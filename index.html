@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Arkanoid Game</title>
+	<style>
+		#canvas {
+			background: #000;
+			border: 2px solid #fff;
+		}
+	</style>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+	<canvas id="canvas" width="880" height="420"></canvas>
+
+	<script>
+		// Initialize variables
+		var canvas = document.getElementById("canvas");
+		var ctx = canvas.getContext("2d");
+		var ballRadius = 10;
+		var x = canvas.width/2;
+		var y = canvas.height-30;
+		var dx = 2;
+		var dy = -2;
+		var paddleHeight = 10;
+		var paddleWidth = 75;
+		var paddleX = (canvas.width-paddleWidth)/2;
+		var rightPressed = false;
+		var leftPressed = false;
+		var brickRowCount = 3;
+		var brickColumnCount = 10;
+		var brickWidth = 75;
+		var brickHeight = 20;
+		var brickPadding = 10;
+		var brickOffsetTop = 30;
+		var brickOffsetLeft = 30;
+		var score = 0;
+		var lives = 1;
+
+		// Create bricks array
+		var bricks = [];
+		for(var c=0; c<brickColumnCount; c++) {
+			bricks[c] = [];
+			for(var r=0; r<brickRowCount; r++) {
+				bricks[c][r] = { x: 0, y: 0, status: 1 };
+			}
+		}
+
+		// Add event listeners for paddle movement
+		document.addEventListener("keydown", keyDownHandler, false);
+		document.addEventListener("keyup", keyUpHandler, false);
+
+		function keyDownHandler(e) {
+			if(e.keyCode == 39) {
+				rightPressed = true;
+			}
+			else if(e.keyCode == 37) {
+				leftPressed = true;
+			}
+		}
+
+		function keyUpHandler(e) {
+			if(e.keyCode == 39) {
+				rightPressed = false;
+			}
+			else if(e.keyCode == 37) {
+				leftPressed = false;
+			}
+		}
+
+		// Collision detection function
+		function collisionDetection() {
+			for(var c=0; c<brickColumnCount; c++) {
+				for(var r=0; r<brickRowCount; r++) {
+					var b = bricks[c][r];
+					if(b.status == 1) {
+						if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
+							dy = -dy;
+							b.status = 0;
+							score++;
+							if(score == brickRowCount*brickColumnCount) {
+								alert("YOU WIN, CONGRATULATIONS!");
+								document.location.reload();
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Draw the ball on the canvas
+		function drawBall() {
+			ctx.beginPath();
+			ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+			ctx.fillStyle = "#fff";
+			ctx.fill();
+			ctx.closePath();
+		}
+
+		// Draw the paddle on the canvas
+		function drawPaddle() {
+			ctx.beginPath();
+			ctx.rect(paddleX, canvas.height-paddleHeight,
+            paddleWidth, paddleHeight);
+		ctx.fillStyle = "#fff";
+		ctx.fill();
+		ctx.closePath();
+	}
+
+	// Draw the bricks on the canvas
+	function drawBricks() {
+		for(var c=0; c<brickColumnCount; c++) {
+			for(var r=0; r<brickRowCount; r++) {
+				if(bricks[c][r].status == 1) {
+					var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+					var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+					bricks[c][r].x = brickX;
+					bricks[c][r].y = brickY;
+					ctx.beginPath();
+					ctx.rect(brickX, brickY, brickWidth, brickHeight);
+					ctx.fillStyle = "#fff";
+					ctx.fill();
+					ctx.closePath();
+				}
+			}
+		}
+	}
+
+	// Draw the score on the canvas
+	function drawScore() {
+		ctx.font = "16px Arial";
+		ctx.fillStyle = "#fff";
+		ctx.fillText("Score: "+score, 8, 20);
+	}
+
+	// Draw the lives on the canvas
+	function drawLives() {
+		ctx.font = "16px Arial";
+		ctx.fillStyle = "#fff";
+		ctx.fillText("Lives: "+lives, canvas.width-65, 20);
+	}
+
+	// Update the ball position and check for collisions
+	function updateBall() {
+		x += dx;
+		y += dy;
+
+		if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+			dx = -dx;
+		}
+		if(y + dy < ballRadius) {
+			dy = -dy;
+		}
+		else if(y + dy > canvas.height-ballRadius) {
+			if(x > paddleX && x < paddleX + paddleWidth) {
+				dy = -dy;
+			}
+			else {
+				lives--;
+				if(!lives) {
+					alert("GAME OVER");
+					document.location.reload();
+				}
+				else {
+					x = canvas.width/2;
+					y = canvas.height-30;
+					dx = 3;
+					dy = -3;
+					paddleX = (canvas.width-paddleWidth)/2;
+				}
+			}
+		}
+	}
+
+	// Update the paddle position based on user input
+	function updatePaddle() {
+		if(rightPressed && paddleX < canvas.width-paddleWidth) {
+			paddleX += 7;
+		}
+		else if(leftPressed && paddleX > 0) {
+			paddleX -= 7;
+		}
+	}
+
+	// Draw the game on the canvas
+	function draw() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		drawBall();
+		drawPaddle();
+		drawBricks();
+		drawScore();
+		drawLives();
+		collisionDetection();
+		updateBall();
+		updatePaddle();
+		requestAnimationFrame(draw);
+	}
+
+	// Start the game
+	draw();
+
+    
+</script>
+<h1>This Game is the Desktop version and can be played on DESKTOP </h1>
+<h2>Developer M Saqib Khan </h2>
+<div class="footer">
+    <p>Follow me on social media:</p>
+    <a class="social-link" href="https://web.facebook.com/mohin.hammaz"><img src="facebook-icon.png" alt="Facebook"></a>
+   >
+    <a class="social-link" href="https://www.instagram.com/saqeeniazi/"><img src="instagram-icon.png" alt="Instagram"></a>
+</div>
+</body>
+</html>
